@@ -25,6 +25,7 @@ function App() {
   const [output, setOutput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const isRSA = algorithm === "RSA";
 
@@ -164,42 +165,49 @@ function App() {
     setError("");
   };
 
+  const handleCopyOutput = () => {
+    navigator.clipboard.writeText(output);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
+  };
+
+  const handleUseOutputAsInput = () => {
+    setInputText(output);
+  };
+
   return (
     <div className="app">
       <div className="container">
-        <h1 className="title">🔐 Kryptos</h1>
-        <p className="subtitle">
-          Encrypt and decrypt text using various algorithms
-        </p>
-
+        <h1 className="page-title">Kryptos</h1>
         <div className="card">
-          {/* Input Text */}
-          <div className="form-group">
-            <label htmlFor="input-text">Input Text</label>
-            <textarea
-              id="input-text"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder="Enter your text here..."
-              rows={4}
-            />
+          {/* Header */}
+          <div className="header">
+            <h2 className="header-title">
+              <span className="icon">🔐</span> Encryption Settings
+            </h2>
+            <p className="header-subtitle">
+              Select an algorithm and provide the necessary keys
+            </p>
           </div>
 
           {/* Algorithm Selection */}
           <div className="form-group">
             <label htmlFor="algorithm">Algorithm</label>
-            <select
-              id="algorithm"
-              value={algorithm}
-              onChange={(e) =>
-                handleAlgorithmChange(e.target.value as Algorithm)
-              }
-            >
-              <option value="AES">AES (Advanced Encryption Standard)</option>
-              <option value="RSA">RSA (Public Key Cryptography)</option>
-              <option value="XOR">XOR Cipher</option>
-              <option value="Caesar">Caesar Cipher</option>
-            </select>
+            <div className="select-wrapper">
+              <select
+                id="algorithm"
+                value={algorithm}
+                onChange={(e) =>
+                  handleAlgorithmChange(e.target.value as Algorithm)
+                }
+                className="select-dropdown"
+              >
+                <option value="AES">AES (Advanced Encryption Standard)</option>
+                <option value="RSA">RSA (Public Key Cryptography)</option>
+                <option value="XOR">XOR Cipher</option>
+                <option value="Caesar">Caesar Cipher</option>
+              </select>
+            </div>
           </div>
 
           {/* Key Inputs */}
@@ -213,6 +221,7 @@ function App() {
                   onChange={(e) => setPublicKey(e.target.value)}
                   placeholder="Public key (used for encryption)"
                   rows={3}
+                  className="input-field"
                 />
               </div>
               <div className="form-group">
@@ -223,21 +232,22 @@ function App() {
                   onChange={(e) => setPrivateKey(e.target.value)}
                   placeholder="Private key (used for decryption)"
                   rows={3}
+                  className="input-field"
                 />
               </div>
               <button
-                className="btn btn-secondary"
+                className="btn btn-generate"
                 onClick={handleGenerateKeys}
                 disabled={isLoading}
               >
-                🔑 Generate Key Pair
+                Generate Key Pair
               </button>
             </>
           ) : (
             <>
               <div className="form-group">
                 <label htmlFor="key">
-                  {algorithm === "Caesar" ? "Shift (number)" : "Key"}
+                  {algorithm === "Caesar" ? "Shift (number)" : "Encryption Key"}
                 </label>
                 <input
                   id="key"
@@ -247,35 +257,56 @@ function App() {
                   placeholder={
                     algorithm === "Caesar"
                       ? "Enter shift number (e.g., 3)"
-                      : "Enter encryption key"
+                      : "Enter your secret key"
                   }
+                  className="input-field"
                 />
               </div>
               <button
-                className="btn btn-secondary"
+                className="btn btn-generate"
                 onClick={handleGenerateKey}
                 disabled={isLoading}
               >
-                🔑 Generate {algorithm === "Caesar" ? "Shift" : "Key"}
+                Generate {algorithm === "Caesar" ? "Shift" : "Key"}
               </button>
             </>
           )}
 
+          {/* Input Text */}
+          <div className="form-group">
+            <label htmlFor="input-text">Input Text</label>
+            <textarea
+              id="input-text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder="Enter text to encrypt or decrypt..."
+              rows={6}
+              className="input-field textarea-large"
+            />
+          </div>
+
           {/* Action Buttons */}
-          <div className="button-group">
+          <div className="action-buttons">
             <button
-              className="btn btn-primary"
+              className="btn btn-encrypt"
               onClick={handleEncrypt}
               disabled={isLoading}
             >
-              🔒 Encrypt
+              <span className="btn-icon">🔒</span> Encrypt
             </button>
             <button
-              className="btn btn-primary"
+              className="btn btn-decrypt"
               onClick={handleDecrypt}
               disabled={isLoading}
             >
-              🔓 Decrypt
+              <span className="btn-icon">🔓</span> Decrypt
+            </button>
+            <button
+              className="btn btn-use-output"
+              onClick={handleUseOutputAsInput}
+              disabled={!output || isLoading}
+            >
+              <span className="btn-icon">🔄</span> Use Output as Input
             </button>
           </div>
 
@@ -288,27 +319,26 @@ function App() {
 
           {/* Output */}
           <div className="form-group">
-            <label htmlFor="output">Output</label>
+            <div className="output-header">
+              <label htmlFor="output">Output</label>
+              <button
+                className="btn btn-copy"
+                onClick={handleCopyOutput}
+                disabled={!output}
+              >
+                <span className="btn-icon">📋</span>{" "}
+                {copySuccess ? "Copied!" : "Copy"}
+              </button>
+            </div>
             <textarea
               id="output"
               value={output}
               readOnly
-              placeholder="Result will appear here..."
+              placeholder="Output will appear here..."
               rows={6}
+              className="input-field textarea-large output-field"
             />
           </div>
-
-          {/* Move to Input Button */}
-          {output && (
-            <button
-              className="btn btn-secondary"
-              onClick={() => {
-                setInputText(output);
-              }}
-            >
-              ⬆️ Move to Input
-            </button>
-          )}
         </div>
       </div>
     </div>
