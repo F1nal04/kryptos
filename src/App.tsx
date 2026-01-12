@@ -167,7 +167,7 @@ function App() {
   return (
     <div className="app">
       <div className="container">
-        <h1 className="title">🔐 Cryptography Demo</h1>
+        <h1 className="title">🔐 Kryptos</h1>
         <p className="subtitle">
           Encrypt and decrypt text using various algorithms
         </p>
