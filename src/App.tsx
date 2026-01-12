@@ -21,6 +21,7 @@ import {
   generateCaesarShift,
   generateVigenereKey,
 } from "./crypto-utils";
+import { Lock, LockOpen, Copy, RefreshCw, ShieldCheck } from "lucide-react";
 
 function App() {
   const [inputText, setInputText] = useState("");
@@ -213,7 +214,7 @@ function App() {
           {/* Header */}
           <div className="header">
             <h2 className="header-title">
-              <span className="icon">🔐</span> Encryption Settings
+              <ShieldCheck className="icon" size={24} /> Encryption Settings
             </h2>
             <p className="header-subtitle">
               Select an algorithm and provide the necessary keys
@@ -328,21 +329,21 @@ function App() {
               onClick={handleEncrypt}
               disabled={isLoading}
             >
-              <span className="btn-icon">🔒</span> Encrypt
+              <Lock className="btn-icon" size={18} /> Encrypt
             </button>
             <button
               className="btn btn-decrypt"
               onClick={handleDecrypt}
               disabled={isLoading}
             >
-              <span className="btn-icon">🔓</span> Decrypt
+              <LockOpen className="btn-icon" size={18} /> Decrypt
             </button>
             <button
               className="btn btn-use-output"
               onClick={handleUseOutputAsInput}
               disabled={!output || isLoading}
             >
-              <span className="btn-icon">🔄</span> Use Output as Input
+              <RefreshCw className="btn-icon" size={18} /> Use Output as Input
             </button>
           </div>
 
@@ -362,7 +363,7 @@ function App() {
                 onClick={handleCopyOutput}
                 disabled={!output}
               >
-                <span className="btn-icon">📋</span>{" "}
+                <Copy className="btn-icon" size={16} />{" "}
                 {copySuccess ? "Copied!" : "Copy"}
               </button>
             </div>
