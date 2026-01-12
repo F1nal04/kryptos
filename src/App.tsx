@@ -4,16 +4,22 @@ import type { Algorithm } from "./crypto-utils";
 import {
   encryptAES,
   decryptAES,
+  encrypt3DES,
+  decrypt3DES,
   encryptRSA,
   decryptRSA,
   encryptXOR,
   decryptXOR,
   encryptCaesar,
   decryptCaesar,
+  encryptVigenere,
+  decryptVigenere,
   generateRSAKeyPair,
   generateAESKey,
+  generate3DESKey,
   generateXORKey,
   generateCaesarShift,
+  generateVigenereKey,
 } from "./crypto-utils";
 
 function App() {
@@ -54,6 +60,10 @@ function App() {
           generatedKey = generateAESKey();
           setOutput("AES key generated successfully!");
           break;
+        case "3DES":
+          generatedKey = generate3DESKey();
+          setOutput("3DES key generated successfully!");
+          break;
         case "XOR":
           generatedKey = generateXORKey(16);
           setOutput("XOR key generated successfully!");
@@ -64,6 +74,10 @@ function App() {
           setOutput(`Caesar shift generated successfully! (Shift: ${shift})`);
           break;
         }
+        case "Vigenere":
+          generatedKey = generateVigenereKey(8);
+          setOutput("Vigenère key generated successfully!");
+          break;
       }
 
       setKey(generatedKey);
@@ -89,6 +103,10 @@ function App() {
           if (!key) throw new Error("Please enter a key");
           result = encryptAES(inputText, key);
           break;
+        case "3DES":
+          if (!key) throw new Error("Please enter a key");
+          result = encrypt3DES(inputText, key);
+          break;
         case "RSA":
           if (!publicKey)
             throw new Error("Please generate or enter a public key");
@@ -104,6 +122,10 @@ function App() {
           result = encryptCaesar(inputText, shift);
           break;
         }
+        case "Vigenere":
+          if (!key) throw new Error("Please enter a key");
+          result = encryptVigenere(inputText, key);
+          break;
       }
 
       setOutput(result);
@@ -131,6 +153,10 @@ function App() {
           if (!key) throw new Error("Please enter a key");
           result = decryptAES(inputText, key);
           break;
+        case "3DES":
+          if (!key) throw new Error("Please enter a key");
+          result = decrypt3DES(inputText, key);
+          break;
         case "RSA":
           if (!privateKey)
             throw new Error("Please generate or enter a private key");
@@ -146,6 +172,10 @@ function App() {
           result = decryptCaesar(inputText, shift);
           break;
         }
+        case "Vigenere":
+          if (!key) throw new Error("Please enter a key");
+          result = decryptVigenere(inputText, key);
+          break;
       }
 
       setOutput(result);
@@ -203,9 +233,13 @@ function App() {
                 className="select-dropdown"
               >
                 <option value="AES">AES (Advanced Encryption Standard)</option>
+                <option value="3DES">
+                  3DES (Triple Data Encryption Standard)
+                </option>
                 <option value="RSA">RSA (Public Key Cryptography)</option>
                 <option value="XOR">XOR Cipher</option>
                 <option value="Caesar">Caesar Cipher</option>
+                <option value="Vigenere">Vigenère Cipher</option>
               </select>
             </div>
           </div>
@@ -257,6 +291,8 @@ function App() {
                   placeholder={
                     algorithm === "Caesar"
                       ? "Enter shift number (e.g., 3)"
+                      : algorithm === "Vigenere"
+                      ? "Enter alphabetic key (e.g., SECRET)"
                       : "Enter your secret key"
                   }
                   className="input-field"

@@ -1,6 +1,6 @@
 import CryptoJS from "crypto-js";
 
-export type Algorithm = "AES" | "RSA" | "XOR" | "Caesar";
+export type Algorithm = "AES" | "3DES" | "RSA" | "XOR" | "Caesar" | "Vigenere";
 
 // AES Encryption/Decryption
 export const encryptAES = (text: string, key: string): string => {
@@ -19,6 +19,26 @@ export const decryptAES = (ciphertext: string, key: string): string => {
     return decrypted;
   } catch (error) {
     throw new Error("AES decryption failed: " + (error as Error).message);
+  }
+};
+
+// 3DES Encryption/Decryption
+export const encrypt3DES = (text: string, key: string): string => {
+  try {
+    return CryptoJS.TripleDES.encrypt(text, key).toString();
+  } catch (error) {
+    throw new Error("3DES encryption failed: " + (error as Error).message);
+  }
+};
+
+export const decrypt3DES = (ciphertext: string, key: string): string => {
+  try {
+    const bytes = CryptoJS.TripleDES.decrypt(ciphertext, key);
+    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+    if (!decrypted) throw new Error("Invalid key or corrupted data");
+    return decrypted;
+  } catch (error) {
+    throw new Error("3DES decryption failed: " + (error as Error).message);
   }
 };
 
@@ -159,6 +179,73 @@ export const decryptCaesar = (ciphertext: string, shift: number): string => {
   return encryptCaesar(ciphertext, 26 - shift);
 };
 
+// Vigenère Cipher
+export const encryptVigenere = (text: string, key: string): string => {
+  if (!key) throw new Error("Key cannot be empty");
+
+  // Remove non-alphabetic characters from key and convert to uppercase
+  const cleanKey = key.toUpperCase().replace(/[^A-Z]/g, "");
+  if (!cleanKey) throw new Error("Key must contain at least one letter");
+
+  let result = "";
+  let keyIndex = 0;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    if (/[a-zA-Z]/.test(char)) {
+      const code = char.charCodeAt(0);
+      const isUpperCase = code >= 65 && code <= 90;
+      const base = isUpperCase ? 65 : 97;
+
+      const textChar = code - base;
+      const keyChar = cleanKey.charCodeAt(keyIndex % cleanKey.length) - 65;
+      const encryptedChar = (textChar + keyChar) % 26;
+
+      result += String.fromCharCode(encryptedChar + base);
+      keyIndex++;
+    } else {
+      // Keep non-alphabetic characters as-is
+      result += char;
+    }
+  }
+
+  return result;
+};
+
+export const decryptVigenere = (ciphertext: string, key: string): string => {
+  if (!key) throw new Error("Key cannot be empty");
+
+  // Remove non-alphabetic characters from key and convert to uppercase
+  const cleanKey = key.toUpperCase().replace(/[^A-Z]/g, "");
+  if (!cleanKey) throw new Error("Key must contain at least one letter");
+
+  let result = "";
+  let keyIndex = 0;
+
+  for (let i = 0; i < ciphertext.length; i++) {
+    const char = ciphertext[i];
+
+    if (/[a-zA-Z]/.test(char)) {
+      const code = char.charCodeAt(0);
+      const isUpperCase = code >= 65 && code <= 90;
+      const base = isUpperCase ? 65 : 97;
+
+      const cipherChar = code - base;
+      const keyChar = cleanKey.charCodeAt(keyIndex % cleanKey.length) - 65;
+      const decryptedChar = (cipherChar - keyChar + 26) % 26;
+
+      result += String.fromCharCode(decryptedChar + base);
+      keyIndex++;
+    } else {
+      // Keep non-alphabetic characters as-is
+      result += char;
+    }
+  }
+
+  return result;
+};
+
 // Helper functions
 const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
   const bytes = new Uint8Array(buffer);
@@ -202,4 +289,21 @@ export const generateCaesarShift = (): number => {
   const array = new Uint8Array(1);
   window.crypto.getRandomValues(array);
   return (array[0] % 25) + 1;
+};
+
+export const generate3DESKey = (): string => {
+  // Generate a random 192-bit (24 byte) key for 3DES
+  const array = new Uint8Array(24);
+  window.crypto.getRandomValues(array);
+  return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join(
+    ""
+  );
+};
+
+export const generateVigenereKey = (length: number = 8): string => {
+  // Generate a random alphabetic key
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  const array = new Uint8Array(length);
+  window.crypto.getRandomValues(array);
+  return Array.from(array, (byte) => chars[byte % chars.length]).join("");
 };
