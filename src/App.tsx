@@ -21,7 +21,15 @@ import {
   generateCaesarShift,
   generateVigenereKey,
 } from "./crypto-utils";
-import { Lock, LockOpen, Copy, RefreshCw, ShieldCheck } from "lucide-react";
+import {
+  Lock,
+  LockOpen,
+  Copy,
+  RefreshCw,
+  ShieldCheck,
+  Info,
+  X,
+} from "lucide-react";
 
 function App() {
   const [inputText, setInputText] = useState("");
@@ -33,8 +41,53 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [copySuccess, setCopySuccess] = useState(false);
+  const [showAlgorithmInfo, setShowAlgorithmInfo] = useState(false);
 
   const isRSA = algorithm === "RSA";
+
+  const algorithmInfo: Record<
+    Algorithm,
+    { name: string; description: string; details: string }
+  > = {
+    AES: {
+      name: "AES (Advanced Encryption Standard)",
+      description:
+        "Industry-standard symmetric encryption algorithm used worldwide.",
+      details:
+        "AES is one of the most secure encryption methods available. It uses a 256-bit key and is trusted by governments and organizations globally. Perfect for encrypting sensitive data like passwords, documents, and messages.",
+    },
+    "3DES": {
+      name: "3DES (Triple Data Encryption Standard)",
+      description: "Legacy symmetric encryption that applies DES three times.",
+      details:
+        "3DES was developed to replace the original DES algorithm by applying it three times with different keys. While still secure, it's slower than AES and primarily used in legacy financial systems. Uses a 192-bit key.",
+    },
+    RSA: {
+      name: "RSA (Rivest-Shamir-Adleman)",
+      description:
+        "Asymmetric public-key cryptography for secure key exchange.",
+      details:
+        "RSA uses a pair of keys: a public key for encryption and a private key for decryption. This allows secure communication without sharing secret keys. Widely used for digital signatures, SSL/TLS certificates, and secure messaging.",
+    },
+    XOR: {
+      name: "XOR Cipher",
+      description: "Simple bitwise encryption for educational purposes.",
+      details:
+        "XOR cipher performs a bitwise exclusive-or operation between the text and key. While fast and simple, it's not secure for real-world use. Great for understanding basic encryption concepts and how keys work.",
+    },
+    Caesar: {
+      name: "Caesar Cipher",
+      description: "Ancient substitution cipher used by Julius Caesar.",
+      details:
+        "One of the oldest known ciphers, it shifts each letter by a fixed number of positions in the alphabet. Named after Julius Caesar who used it for military communications. Easy to crack but excellent for learning encryption basics.",
+    },
+    Vigenere: {
+      name: "Vigenère Cipher",
+      description: "Polyalphabetic substitution cipher using a keyword.",
+      details:
+        "Invented in the 16th century, the Vigenère cipher uses a repeating keyword to shift letters by different amounts. It was considered 'unbreakable' for centuries and represents a major advancement over simple substitution ciphers like Caesar.",
+    },
+  };
 
   const handleGenerateKeys = async () => {
     setIsLoading(true);
@@ -223,7 +276,17 @@ function App() {
 
           {/* Algorithm Selection */}
           <div className="form-group">
-            <label htmlFor="algorithm">Algorithm</label>
+            <div className="label-with-info">
+              <label htmlFor="algorithm">Algorithm</label>
+              <button
+                className="info-button"
+                onClick={() => setShowAlgorithmInfo(true)}
+                type="button"
+                aria-label="Algorithm information"
+              >
+                <Info size={18} />
+              </button>
+            </div>
             <div className="select-wrapper">
               <select
                 id="algorithm"
@@ -244,6 +307,39 @@ function App() {
               </select>
             </div>
           </div>
+
+          {/* Algorithm Info Modal */}
+          {showAlgorithmInfo && (
+            <div
+              className="modal-overlay"
+              onClick={() => setShowAlgorithmInfo(false)}
+            >
+              <div
+                className="modal-content"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="modal-header">
+                  <h3>{algorithmInfo[algorithm].name}</h3>
+                  <button
+                    className="modal-close"
+                    onClick={() => setShowAlgorithmInfo(false)}
+                    aria-label="Close"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                <div className="modal-body">
+                  <p className="modal-description">
+                    <strong>Overview:</strong>{" "}
+                    {algorithmInfo[algorithm].description}
+                  </p>
+                  <p className="modal-details">
+                    {algorithmInfo[algorithm].details}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Key Inputs */}
           {isRSA ? (
